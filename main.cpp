@@ -251,12 +251,17 @@ struct Numeric
         value = nullptr;
     }
 
-    operator Type() const {return *value;}
+    operator Type() const
+    {
+        return *value;
+    }
 
     Numeric& operator+=(const Type& rhs)
     {
         if(value)
-        {*value += rhs;}
+        {
+            *value += rhs;
+        }
 
         return *this;
     }
@@ -264,14 +269,18 @@ struct Numeric
     Numeric& operator-=(const Type& rhs)
     {
         if(value)
-        {*value -= rhs;}
+        {
+            *value -= rhs;
+        }
 
         return *this;
     }
     Numeric& operator*=(const Type& rhs)
     {
         if(value)
-        {*value *= rhs;}
+        {
+            *value *= rhs;
+        }
 
         return *this;
     }
@@ -301,7 +310,9 @@ struct Numeric
         }
 
         if (value)
-        {*value /= rhs;}
+        {
+            *value /= rhs;
+        }
 
         return *this;
     }
@@ -314,7 +325,9 @@ struct Numeric
     Numeric& apply(std::function<Numeric&(std::unique_ptr<Type>&)> func)
     {
         if(func)
-        {return func(value);}
+        {
+            return func(value);
+        }
 
         return *this;
     }
@@ -322,7 +335,9 @@ struct Numeric
     Numeric& apply(void(*funcPtr)(std::unique_ptr<Type>&))
     {
         if(funcPtr)
-        {funcPtr(value);}
+        {
+            funcPtr(value);
+        }
 
         return *this;
     }
@@ -333,7 +348,9 @@ private:
     Numeric& powInternal(Type arg)
     {
         if(value)
-        {*value = static_cast<Type>(std::pow(*value, arg));}
+        {
+            *value = static_cast<Type>(std::pow(*value, arg));
+        }
 
         return *this;
     }
@@ -344,7 +361,7 @@ private:
 template<typename NumericType>
 void myNumericFreeFunct(std::unique_ptr<NumericType>& value)
 {
-    NumericType& numValue = *value;
+    auto& numValue = *value;
     numValue += static_cast<NumericType>(7.0);
 }
 
@@ -368,7 +385,9 @@ struct Numeric<double>
     Numeric& operator+=(const Type& rhs)
     {
         if(value)
-        {*value += rhs;}
+        {
+            *value += rhs;
+        }
 
         return *this;
     }
@@ -376,7 +395,9 @@ struct Numeric<double>
     Numeric& operator-=(const Type& rhs)
     {
         if(value)
-        {*value -= rhs;}
+        {
+            *value -= rhs;
+        }
 
         return *this;
     }
@@ -384,7 +405,9 @@ struct Numeric<double>
     Numeric& operator*=(const Type& rhs)
     {
         if(value)
-        {*value *= rhs;}
+        {
+            *value *= rhs;
+        }
 
         return *this;
     }
@@ -397,7 +420,9 @@ struct Numeric<double>
         }
 
         if (value)
-        {*value /= rhs;}
+        {
+            *value /= rhs;
+        }
         
         return *this;
     }
@@ -420,7 +445,9 @@ private:
     Numeric& powInternal(Type arg)
     {
         if(value)
-        {*value = static_cast<Type>(std::pow(*value, arg));}
+        {
+            *value = static_cast<Type>(std::pow(*value, arg));
+        }
 
         return *this;
     }
