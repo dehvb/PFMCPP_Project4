@@ -1,78 +1,40 @@
 /*
-Prject 4: Part 8 / 9
- video: Chapter 5 Part 6 Task 
+Project 4: Part 9 / 9
+ video: Chapter 5 Part 8
 
-Create a branch named Part8
+Create a branch named Part9
 
- R-Values L-Values Move Semantics.
-
- This Task is going to demonstrate R-Values and writing Generic Code
-
-    Build/Run often with this task to make sure you're not breaking the code with each step.
-    I recommend committing after you get each step working so you can revert to a working version easily if needed.
-    it's very easy to mess this task up. 
+ Rule of 3-5-0 and S.R.P.
  
- Your job is to replace the owned type (the primitive specified by your template argument) from the 
-     Templated Class you created in Ch5 p04 with a struct named Temporary that can behave ENTIRELY as a temporary object.
+ DO NOT EDIT YOUR PREVIOUS main(). 
  
- That means you must use conversion functions to interact with what it owns.
+ 1) add the Leak Detector files from Project5
  
- You need to figure out how to use conversion functions to be able to GET and SET the 'value' member variable.
-    hint: conversion functions can return by value and also by ___...
-  
- 1) Here is a starting point for how to implement your Temporary struct.
+ 2) move these macros after the JUCE_LEAK_DETECTOR macro :
+ */
+
+#define JUCE_DECLARE_NON_COPYABLE(className) \
+            className (const className&) = delete;\
+            className& operator= (const className&) = delete;
+
+#define JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(className) \
+            JUCE_DECLARE_NON_COPYABLE(className) \
+            JUCE_LEAK_DETECTOR(className)
+
+/*
+ 3) add JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Temporary) to the end of the  Temporary<> struct
+ 
+ 4) add JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Numeric) to the end of the Numeric<> struct
+ 
+ if you compile it, you'll see lots of errors about deleted functions.
+ 
+ 5) Implement the Rule of 5 on Numeric<> and Temporary<> to fix this.
+ 
+ You should end up with the same program output as Part 8's task if you did it right.
  */
 
 
 /*
- 2) add the definition of Temporary::counter here, which is a static variable and must be defined outside of the class.
-    Remember the rules about how to define a Template member variable/function outside of the class.
-*/
-
-
-/*
- 3) You'll need to template your overloaded math operator functions in your Templated Class from Ch5 p04
-    use static_cast to convert whatever type is passed in to your template's NumericType before performing the +=, -=, etc.  here's an example implementation:
- */
-/*namespace example
-{
-template<typename NumericType>
-struct Numeric
-{
-    //snip
-    template<typename OtherType>
-    Numeric& operator-=(const OtherType& o) 
-    { 
-        *value -= static_cast<NumericType>(o); 
-        return *this; 
-    }
-    //snip
-};
-}*/
-
-/*
- 4) remove your specialized <double> template of your Numeric<T> class from the previous task (ch5 p04)
-    replace the 2 apply() functions in your Numeric<T> with the single templated apply() function from the specialized <double> template.
- */
-
-/*
- 5) Template your pow() function the same way you templated the overloaded math operators
-    Remove the call to powInternal() and just call std::pow() directly.
-    you'll need to static_cast<> the pow() argument the same way you did in the overloaded math operators, when you pass it to std::pow()
- */
-
-/*
- 6) Finally, your conversion function in your templated class is going to be returning this Temporary, 
-        so you should probably NOT return by copy if you want your templated class's owned object to be modified by any math operation.
-    See the previous hint for implementing the conversion functions for the Temporary if you want to get the held value
-*/
-
-
-/*
- 7) replace main() with the main below
-        you can remove or fix all previous partX() functions if they cause compiler errors. 
-        you can leave them where they are if they don't produce any errors.
-      
  If you did everything correctly, this is the output you should get:
  
 I'm a Temporary<f> object, #0
@@ -107,8 +69,6 @@ i cubed: 531441
 
 Use a service like https://www.diffchecker.com/diff to compare your output. 
 */
-
-
 
 
 struct A{};
@@ -280,94 +240,6 @@ void cube (std::unique_ptr<NumericType>& value)
     auto& v = *value;
     *value = v * v * v;
 }
-
-// explicit template specialization for 'double'
-/*template<>
-struct Numeric<double>
-{
-    using Type = double;
-
-    Numeric(Type val) : value(std::make_unique<Type>(val))
-    {}
-
-    ~Numeric()
-    {
-        value = nullptr;
-    }
-
-    operator Type() const {return *value;}
-
-    Numeric& operator+=(const Type& rhs)
-    {
-        if(value)
-        {
-            *value += rhs;
-        }
-
-        return *this;
-    }
-
-    Numeric& operator-=(const Type& rhs)
-    {
-        if(value)
-        {
-            *value -= rhs;
-        }
-
-        return *this;
-    }
-
-    Numeric& operator*=(const Type& rhs)
-    {
-        if(value)
-        {
-            *value *= rhs;
-        }
-
-        return *this;
-    }
-
-    Numeric& operator/=(const Type& rhs)
-    {
-        if (std::abs(rhs) <= std::numeric_limits<Type>::epsilon())
-        {
-            std::cout << "warning: floating point division by zero!" << std::endl;
-        }
-
-        if (value)
-        {
-            *value /= rhs;
-        }
-        
-        return *this;
-    }
-
-    Numeric& pow(const Type& tExp)
-    {
-        return powInternal(tExp);
-    }
-
-    template<typename Callable>
-    Numeric& apply(Callable&& funcCallable)
-    {
-        funcCallable(value);
-        return *this;
-    }
-    
-private:
-    std::unique_ptr<Type> value = nullptr;
-
-    Numeric& powInternal(Type arg)
-    {
-        if(value)
-        {
-            *value = static_cast<Type>(std::pow(*value, arg));
-        }
-
-        return *this;
-    }
-};*/
-
 
 //Point
 struct Point
