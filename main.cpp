@@ -13,13 +13,7 @@ Create a branch named Part9
  2) move these macros after the JUCE_LEAK_DETECTOR macro :
  */
 
-#define JUCE_DECLARE_NON_COPYABLE(className) \
-            className (const className&) = delete;\
-            className& operator= (const className&) = delete;
 
-#define JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(className) \
-            JUCE_DECLARE_NON_COPYABLE(className) \
-            JUCE_LEAK_DETECTOR(className)
 
 /*
  3) add JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Temporary) to the end of the  Temporary<> struct
@@ -105,6 +99,8 @@ struct HeapA
 #include <functional>
 #include <memory>
 #include <typeinfo>
+#include "LeakedObjectDetector.h"
+#include "Atomic.h"
 
 
 template<typename NumericType>
@@ -115,6 +111,23 @@ struct Temporary
         std::cout << "I'm a Temporary<" << typeid(v).name() << "> object, #"
                   << counter++ << std::endl;
     }
+
+    // Rule of 5 (copy constructor and copy assignment defined (i.e. deleted) in macro)
+    ~Temporary() = default;
+
+    //Temporary(const Temporary& other) = delete;
+    //Temporary& operator=(const Temporary& other) = delete;
+    
+    Temporary(Temporary&& other) :
+    v(std::move(other.v))
+    {}
+
+    Temporary& operator=(Temporary&& other)
+    {
+        v = std::move(other.v);
+        return *this;
+    }
+
     /*
      revise these conversion functions to read/write to 'v' here
      hint: what qualifier do read-only functions usually have?
@@ -124,6 +137,8 @@ struct Temporary
 private:
     static int counter;
     NumericType v;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Temporary)
 };
 
 template<typename T>
@@ -135,12 +150,23 @@ struct Numeric
 {
     using Type = Temporary<NumericType>;
 
-    Numeric(Type val) : value(std::make_unique<Type>(val))
+    Numeric(NumericType val) : value(std::make_unique<Type>(val))
     {}
 
     ~Numeric()
     {
         value = nullptr;
+    }
+    
+    // Rule of 5 (copy constructor and copy assignment defined (i.e. deleted) in macro, destructor already here)
+    Numeric(Numeric&& other) :
+    value(std::move(other.value))
+    {}
+    
+    Numeric& operator=(Numeric&& other)
+    {
+        value = std::move(other.value);
+        return *this;
     }
 
     operator NumericType() const { return *value; }
@@ -223,6 +249,8 @@ struct Numeric
     
 private:
     std::unique_ptr<Type> value = nullptr;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Numeric)
 };
 
 
